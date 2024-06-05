@@ -5,11 +5,11 @@ version: '3.8'
 services:
   db:
      image: postgres:latest
-    environment: 
+    environment:
       POSTGRES_DB: zeyaddatabase
       POSTGRES_USER: zeyaddd
       POSTGRES_PASSWORD: mypasswordz
-    volumes: 
+    volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - mynetwork
@@ -36,6 +36,7 @@ volumes:
 
 
 networks:
- mynetworkz:
+ mynetwork:
+
 
 

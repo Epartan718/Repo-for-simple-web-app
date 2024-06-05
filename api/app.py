@@ -4,22 +4,21 @@ import os
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-app.config['SQLALCHEMY_TRACK_MODIFICATION'] = False
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False  # Corrected the key name
 db = SQLAlchemy(app)
 
 
-class Product(db.Mode1):
+class Product(db.Model):  # Corrected the class name
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(), nullable=False)
     price = db.Column(db.Float, nullable=False)
 
 
-
-
 @app.route('/products', methods=['GET'])
 def get_products():
     products = Product.query.all()
-    return jsonify([{'id' : p.id, 'name' : p.name, 'price':p.price} for p in products])
+    return jsonify([{'id': p.id, 'name': p.name, 'price': p.price} for p in products])
+
 
 @app.route('/products', methods=['POST'])
 def add_product():
@@ -28,8 +27,11 @@ def add_product():
     db.session.add(new_product)
     db.session.commit()
     return jsonify({'id': new_product.id, 'name': new_product.name, 'price': new_product.price}), 201
-    if __name__ == '__main__':
-       db.create_all()
-       app.run(host='0.0.0.0', port=5000)
+
+
+if __name__ == '__main__':
+    db.create_all()  # Moved this line out of the add_product function
+    app.run(host='0.0.0.0', port=5000)
+
 
 
