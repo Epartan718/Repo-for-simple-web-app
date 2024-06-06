@@ -11,7 +11,7 @@ a REST API and a PostgreSQL database. The API will enable retrieving and adding 
  - I choose to use Centos stream 9 and I Downloaded it through this link https://www.centos.org/download/
  - After I downloaded it the distro I set up a new virtual machine on the virtual box
  - Start the vm and go through the set up and installation process until you get to the home screen
- - Diromg the set up proccess make sure to remmber the ID and Password
+ - During the set up proccess make sure to remmber the ID and Password
 
 ## Step 3 install Putty to access your test environment
 
@@ -22,43 +22,39 @@ a REST API and a PostgreSQL database. The API will enable retrieving and adding 
 
 ## Step 4 update VM and configure ssh access
 
- - Update Centos VM 
-    - '''' bash 
+
+# Update Centos VM 
     -- sudo dnf update -y
- - Once update is complete go ahead, install, start, and enable  SSH
-    -  '''' bash
+# Once update is complete go ahead, install, start, and enable  SSH
     -- sudo dnf install -y openssh-server
     -- sudo systemctl start sshd
     -- sudo systemctl enable sshd
- - Verify that SSH client is running in the VM
-  - '''' bash
+# Verify that SSH client is running in the VM
     -- sudo systemctl status sshd 
 
 ## Step 5 SSH into the instance through the Putty Client
 
- - find the IP address of the VM 
-   - '''' bash
+# Find the IP address of the VM 
     -- ip addr show 
-    -- 192.168.12.233
+# Select the ip addresse that is next to inet in enp0s3 sectiom
    - once we obtained the IP address of the instance we will go to Putty Client and ssh into the VM
-   - some key pointers to make sure of
-     -- make sure the shh option is marker 
+# Some key pointers to make sure of
+     -- make sure the ssh option is marked 
      -- make sure it is configured to the default port which is port 22
      -- then open the instance and enter the ID and Password
 
-   - If for any reason you get the error of network connection timeout go through the following steps
+# If for any reason you get the error of network connection timeout go through the following steps
      -- Shut down your VM 
      -- Go to VM settings --> Network -> Adapter 1 -> Attached to : Bridged Adapter
      -- Start your VM again.
 
-   - this shoud fix the issue if you got that error
+# This shoud fix the issue if you got that error
 
 
 
-## Step 6 install and configure git  
-
-- Now once you have accessed the instance its time to install and configure git for the documentation of the project
-   - '''' bash
+## Step 6 install and configure git
+  
+#Now once you have accessed the instance its time to install and configure git for the documentation of the project
     -- sudo dnf install -y git
     -- git --version
     -- git config --global user.name "Epartan718"
@@ -77,200 +73,300 @@ a REST API and a PostgreSQL database. The API will enable retrieving and adding 
   - name it 
   - then select all the admin options
   - then click generate token
-  -  keep the password on a different tap for we will use it later
+# Keep the password on a different tap for we will use it later
 
- - now we will clone the repository 
- - '''' bash 
+# Now we will clone the repository  
    -- git clone https://github.com/Epartan718/test-repo.git
    -- cd test-repo
    -- touch README.md
+# Update README.md file as you go to give guidance for anyone who would like to create the application
   
+
 ## Step 7 Install Docker, Docker CLI, Containerd
 
-- so we will find install dnf package manager in order to install docker
- - '''' bash
+# So we will find install dnf package manager in order to install docker
  -- sudo dnf update -y 
  -- sudo dnf install -y dnf-plugins-core
-- Add Docker repo 
- - '''' bash
+# Add Docker repo 
  -- sudo dnf config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-- Install Docker CE
+# Install Docker CE
  -- sudo dnf install -y docker-ce docker-ce-cli containerd.io
-- start and enable Docker
+# Start and enable Docker
  -- sudo systemctl start docker
  -- sudo systemctl enable docker
-- verify if docker is working
+# Verify if docker is working
  -- sudo docker run hello-world
 
  
 ## Step 8 Install Docker Compose, Grant premission and verify installation 
 
-- Download docker compose
- - '''' bash
+# Download docker compose
  -- sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
  -- sudo chmod +x /usr/local/bin/docker-compose
  -- docker-compose -- version
 
 ## Step 9 Create Docker Compose configuration file 
 
-- Create a ' docker-compose.yml' file with the following content:
- - '''' bash
+# Create a docker-compose.yml file with the following content:
   -- cd docker-project
   -- touch docker-compose.yml
-  -- nano docker-compose.yml
- - '''' yaml
- - define the version for docker compose
-   version: '3.8'
- - define the services ( for this example we are creating a postgre database and rest api)
-  services:
-    db:
-      image: postgres:latest
-      environment:
-        POSTGRES_DB: zeyaddatabase
-        POSTGRES_USER: zeyaddd
-        POSTGRES_PASSWORD: mypasswordz
-      volumes:
-        - postgres_data:/var/lib/postgresql/data
-      networks:
-        - mynetwork
+  -- vim docker-compose.yml
 
-    api:
-      build: ./api
-      depends_on:
-        - db
-      environment:
-        DATABASE_URL: postgres://zeyaddd:mypasswordz@db:5432/zeyaddatabase
-      ports:
-        - "5000:5000"
-      networks:
-        - mynetwork
-- defining the volumes that can be shared across multiple services or used for presistent storage
+ - ''' yml
+version: '3.8'
 
-  volumes:
-    postgres_data:
+services:
+  db:
+# Using the latest version of the official PostgreSQL image
+    image: postgres:latest
+    environment:
+# Setting environment variables for PostgreSQL database
+      POSTGRES_DB: zeyaddatabase
+      POSTGRES_USER: zeyaddd
+      POSTGRES_PASSWORD: mypasswordz
+    volumes:
+# Persisting PostgreSQL data in a named volume
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+# Connecting the database to a custom network
+      - mynetwork
 
--defining custom networks for the services to comunicat
-  networks:
-    mynetwork:
+  api:
+# Building the API service from the Dockerfile in the 'api' directory
+    build: ./api
+    depends_on:
+# Ensuring the database service starts before the API service
+      - db
+    environment:
+# Setting environment variable for the database URL
+      DATABASE_URL: postgresql://zeyaddd:mypasswordz@db:5432/zeyaddatabase
+    ports:
+# Mapping port 5000 on the host to port 5000 in the container
+      - "5000:5000"
+    networks:
+# Connecting the API service to the custom network
+      - mynetwork
 
+volumes:
+# Defining a named volume for persisting PostgreSQL data
+  postgres_data:
 
+networks:
+# Defining a custom network for the services
+  mynetwork:
 
-
+'''
+ 
 # Step 10 create Custom Dockerfile for API service in api folder
 
-
-- go back to test-repo
-- make a new directory and call it api
- - '''' bash
+# Make a new directory and call it api
   -- mkdir api
   -- cd api
-- now create the dockerfile 
- -''''bash
+# Now create the dockerfile 
  -- touch Dockerfile
-- now in that docker file write the python code that will be used to build and reproduce the environment 
- - ''''python
- -- FROM python:3.8-slim
-
-    WORKDIR /app
-
-    COPY requirements.txt requirements.txt
-    RUN pip install -r requirements.txt
-
-    COPY . .
-
-    CMD ["python", "app.py"]
+ -- vim Dockerfile
 
 
+# Now in that docker file write the python code that will be used to build and reproduce the environment 
+ 
+ - '''python
+
+# Using a slim version of the official Python 3.8 image
+FROM python:3.8-slim
+
+# Installing necessary packages and dependencies
+RUN apt-get update && apt-get install -y python3-pip libpq-dev gcc
+
+# Setting the working directory inside the container
+WORKDIR /app
+
+# Copying the requirements file to the container
+COPY requirements.txt .
+
+# Installing Python dependencies
+RUN pip install -r requirements.txt
+
+# Copying the rest of the application code to the container
+COPY . .
+
+# Command to run the application
+CMD ["python", "app.py"]
+
+'''
 
 ## Step 11 Create the API application in api folder
 
-- make sure you are in the api directory within the repo
- -''''bash
- -- pwd (lets you know where exactly are you)
+# Make sure you are in the api directory within the repo
+-- pwd
 
-- once you confirm you are in the api folder go ahead and create the requirement file
- -'''' bash
+# Once you confirm you are in the api folder go ahead and create the requirement file
  -- touch requirements.txt
- -- nano requirements.txt
-- write the following libaries 
+ -- vim requirements.txt
+
+# Write the following libaries 
+
+# Flask web framework for building the API
 Flask
-SQLAlchemy
+# PostgreSQL adapter for Python
 psycopg2-binary
+# Extension for Flask to support SQLAlchemy
+Flask-sqlalchemy
 
 
-- save then go back to api directory 
-- create the app.py file that will serve as the main entry point for the web app
-
- -'''bash
+#Save then go back to api directory
+ 
+# Create the app.py file that will serve as the main entry point for the web app
  -- touch app.py
- -- nano app.py
- -'''' python
-- imports to build the app 
- from flask import Flask, request, jsonify
+ -- vim app.py
+
+ -''' pytho
+n
+from flask import Flask, request, jsonify, abort
 from flask_sqlalchemy import SQLAlchemy
 import os
 
-- application set up
-
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+
+# Configuration
+DATABASE_URL = os.getenv('DATABASE_URL')
+if not DATABASE_URL:
+    raise ValueError("No DATABASE_URL set for Flask application")
+
+# Configuring the SQLAlchemy part of Flask
+app.config['SQLALCHEMY_DATABASE_URI'] = DATABASE_URL
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 db = SQLAlchemy(app)
 
-- model definition
-
+# Product model
 class Product(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(80), nullable=False)
+    name = db.Column(db.String(), nullable=False)
     price = db.Column(db.Float, nullable=False)
 
-- routes
+# Routes
 @app.route('/products', methods=['GET'])
 def get_products():
+# Querying all products from the database
     products = Product.query.all()
-    return jsonify([{'id': p.id, 'name': p.name, 'price': p.price} for p in products])
+# Formatting the products for JSON response
+    formatted_products = [
+        {'id': p.id, 'name': p.name, 'price': p.price} for p in products
+    ]
+# Returning the formatted products and the total count
+    return jsonify({
+        'products': formatted_products,
+        'total': len(formatted_products)
+    })
 
 @app.route('/products', methods=['POST'])
 def add_product():
+# Getting the JSON data from the request
     data = request.get_json()
-    new_product = Product(name=data['name'], price=data['price'])
-    db.session.add(new_product)
-    db.session.commit()
+
+
+# Validating input data
+    if not data or not 'name' in data or not 'price' in data:
+        abort(400, description="Request must contain 'name' and 'price' fields")
+
+    try:
+# Creating a new product instance
+        new_product = Product(name=data['name'], price=float(data['price']))
+        db.session.add(new_product)
+        db.session.commit()
+    except (ValueError, TypeError):
+        abort(400, description="Invalid input data format")
+
+# Returning the created product
     return jsonify({'id': new_product.id, 'name': new_product.name, 'price': new_product.price}), 201
 
-- run the application
-
+# Initialize database and add initial products
 if __name__ == '__main__':
-    db.create_all()
+    with app.app_context():
+        db.create_all()
+
+        # Adding initial products if not already present
+        initial_products = [
+            {"name": "Ice Cream", "price": 5.99},
+            {"name": "Chocolate", "price": 3.99},
+            {"name": "Fruits", "price": 4.99}
+        ]
+
+        for product_data in initial_products:
+            if not Product.query.filter_by(name=product_data["name"]).first():
+                product = Product(name=product_data["name"], price=product_data["price"])
+                db.session.add(product)
+        db.session.commit()
+
+    # Running the Flask application
     app.run(host='0.0.0.0', port=5000)
-- save file and exit
+'''
+# Save then exit file
+
+
+## Step 12 Build the Dockercompose image 
+
+# Head to the project root 
+-- cd ..
+
+
+# Build and start the Docker compose
+-- docker-compose up --build 
+
+# Verify if the image is up 
+-- docker-compose ps
 
 
 
 
+## Step 13 Test the functionality of the Api
+
+
+- Use the following tests to verify the full functionality of the api 
+
+# Test GET /products Endpoint
+-- curl -X GET http://localhost:5000/products
+
+# Test POST /products Endpoint
+-- curl -X POST -H "Content-Type: application/json" -d '{"name":"Ice Cream","price":5.99}' http://localhost:5000/products
+
+# Verify the New Product was added 
+-- curl -X GET http://localhost:5000/products
+
+# Add more products 
+-- curl -X POST -H "Content-Type: application/json" -d '{"name":"Banana","price":3.99}' http://localhost:5000/products
+
+-- curl -X POST -H "Content-Type: application/json" -d '{"name":"Chips","price":2.99}' http://localhost:5000/products
+
+# Verify if all products were added
+--curl -X GET http://localhost:5000/products
+
+# Test for missin name or price 
+-- curl -X POST -H "Content-Type: application/json" -d '{"price":5.99}' http://localhost:5000/products
+-- curl -X POST -H "Content-Type: application/json" -d '{"name":"Ice Cream"}' http://localhost:5000/products
+
+# Test for invalid price format
+ -- curl -X POST -H "Content-Type: application/json" -d '{"name":"Ice Cream","price":"invalid"}' http://localhost:5000/products
 
 
 
 
+# Step 14 Final
+
+- After playing around and exploring the environment you can go ahead and shut down everthingy by using the following
+
+# Stop running containers
+-- docker-compose down
+
+# Additional clean up 
+-- docker volume prune -f
+-- docker network prune -f
+-- docker image prune -f
+
+# Shutdown VM
+-- Sudo shutdown now
 
 
+#Thank you so much for allowing me to take part in this project I enjoyed every moment working on it!!
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
- 
