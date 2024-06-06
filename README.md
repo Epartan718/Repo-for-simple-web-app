@@ -1,4 +1,4 @@
-# This document explain the steps and methods that I have used in order to accomplish the goal of  Deploying a simple application using Docker Compose, consisting of two services:
+# This document explain the steps and methods that have been used in order to accomplish the goal of  Deploying a simple application using Docker Compose, consisting of two services:
 a REST API and a PostgreSQL database. The API will enable retrieving and adding products through HTTP GET and POST requests
 
 
@@ -8,8 +8,8 @@ a REST API and a PostgreSQL database. The API will enable retrieving and adding 
 
 ## Step 2 download the distro you would like to use as a test environment
  
- - I choose to use Centos stream 9 and I Downloaded it through this link https://www.centos.org/download/
- - After I downloaded it the distro I set up a new virtual machine on the virtual box
+ - Centos stream 9 was chosen for this project and it Downloaded through this link https://www.centos.org/download/
+ - After we downloaded it a new virtual machine was set up on the virtual box
  - Start the vm and go through the set up and installation process until you get to the home screen
  - During the set up proccess make sure to remmber the ID and Password
 
@@ -21,7 +21,6 @@ a REST API and a PostgreSQL database. The API will enable retrieving and adding 
  - we will come back to use putty in a later step
 
 ## Step 4 update VM and configure ssh access
-
 
 # Update Centos VM 
     -- sudo dnf update -y
